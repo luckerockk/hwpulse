@@ -81,6 +81,8 @@ python3 hwpulse.py --help
 
 - Корневые поля:
   - `timestamp` - Unix time в миллисекундах.
+  - `systemName` - имя системы (из `PRETTY_NAME`).
+  - `kernel` - версия ядра (из `uname -r`).
   - `cpu` - объект CPU (всегда присутствует).
   - `gpu` - объект GPU (присутствует только если GPU определился).
 
@@ -98,6 +100,8 @@ python3 hwpulse.py --help
 ```json
 {
   "timestamp": 1770978423351,
+  "systemName": "Debian GNU/Linux 12 (bookworm)",
+  "kernel": "6.12.69+deb13-amd64",
   "cpu": {
     "modelName": "AMD Ryzen 9 9950X 16-Core Processor",
     "loadPercent": 0.0,

@@ -139,7 +139,7 @@ def get_cpu_model() -> str:
     return "N/A"
 
 
-def get_system_name() -> str:
+def get_system_info() -> Tuple[str, str, str]:
     pretty = ""
     try:
         with open("/etc/os-release", "r", encoding="utf-8", errors="ignore") as f:
@@ -156,12 +156,18 @@ def get_system_name() -> str:
     kernel = run_cmd(["uname", "-r"]).splitlines()
     kernel_ver = kernel[0].strip() if kernel else ""
 
+    return strip_if_na(pretty), strip_if_na(hostname), strip_if_na(kernel_ver)
+
+
+def get_system_name() -> str:
+    pretty, hostname, kernel_ver = get_system_info()
+
     parts: list[str] = []
-    if pretty:
+    if pretty != "N/A":
         parts.append(pretty)
-    if hostname:
+    if hostname != "N/A":
         parts.append(f"host {hostname}")
-    if kernel_ver:
+    if kernel_ver != "N/A":
         parts.append(f"kernel {kernel_ver}")
 
     if not parts:
@@ -916,6 +922,8 @@ def render_dashboard(
 
 
 def build_output_payload(
+    system_name: str,
+    kernel_version: str,
     cpu_model: str,
     gpu_model: str,
     cpu_load: str,
@@ -945,6 +953,8 @@ def build_output_payload(
 
     payload: dict[str, object] = {
         "timestamp": int(time.time() * 1000),
+        "systemName": system_name,
+        "kernel": kernel_version,
         "cpu": cpu_obj,
     }
 
@@ -1004,7 +1014,10 @@ def detect_output_sources() -> tuple[dict[str, bool], dict[str, bool]]:
 
 
 def init_output_state(sources: dict[str, bool]) -> dict[str, object]:
+    system_name, _, kernel_version = get_system_info()
     state: dict[str, object] = {
+        "system_name": system_name,
+        "kernel_version": kernel_version,
         "cpu_model": get_cpu_model(),
         "gpu_model": "N/A",
         "gpu": empty_gpu_metrics(),
@@ -1104,6 +1117,8 @@ def sample_output_state(state: dict[str, object], sources: dict[str, bool]) -> N
 def build_output_payload_from_state(state: dict[str, object], metric_enabled: dict[str, bool]) -> dict:
     gpu_metrics = state["gpu"] if isinstance(state["gpu"], dict) else empty_gpu_metrics()
     return build_output_payload(
+        str(state["system_name"]),
+        str(state["kernel_version"]),
         str(state["cpu_model"]),
         str(state["gpu_model"]),
         str(state["cpu_load"]),
