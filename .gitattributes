@@ -1,0 +1,22 @@
+# Linux-first repository: always keep LF in git and working tree.
+* text=auto eol=lf
+
+# Shell/Python/docs/config must stay LF.
+*.sh text eol=lf
+*.py text eol=lf
+*.md text eol=lf
+*.json text eol=lf
+*.yml text eol=lf
+*.yaml text eol=lf
+
+# Common binary files.
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.gif binary
+*.ico binary
+*.pdf binary
+*.zip binary
+*.gz binary
+*.tar binary
+*.7z binary
