@@ -1,101 +1,101 @@
 # HWPULSE
 
-Терминальный монитор системы в реальном времени (CPU/GPU/RAM)
+Real-time terminal system monitor (CPU/GPU/RAM)
 
-## Возможности
+## Features
 
-- Цветовые пороги для нагрузки, температуры и мощности.
-- История Min/Max для каждой метрики с момента запуска.
-- Графики по основным метрикам (в режиме по умолчанию).
-- Режимы JSON для интеграции с внешними программами.
+- Color thresholds for load, temperature, and power.
+- Min/Max history for each metric since startup.
+- Graphs for key metrics (default mode).
+- JSON modes for integration with external programs.
 
-## Требования
+## Requirements
 
 - Linux
-- Python **3.9+** (рекомендуется 3.10+)
-- `free` (пакет `procps`)
-- Для GPU-метрик: `nvidia-smi`
-- Для температуры CPU: `sensors` (пакет `lm-sensors`)
-- Для CPU power: `/sys/class/powercap/intel-rapl:0/energy_uj` (если нет, метрика будет недоступна)
+- Python **3.9+** (3.10+ recommended)
+- `free` (from `procps` package)
+- For GPU metrics: `nvidia-smi`
+- For CPU temperature: `sensors` (from `lm-sensors` package)
+- For CPU power: `/sys/class/powercap/intel-rapl:0/energy_uj` (if missing, the metric is unavailable)
 
-## Установка зависимостей (Ubuntu/Debian)
+## Install Dependencies (Ubuntu/Debian)
 
 ```bash
 sudo apt update
 sudo apt install -y python3 procps util-linux lm-sensors
 ```
 
-Опционально инициализировать датчики:
+Optional sensor initialization:
 
 ```bash
 sudo sensors-detect --auto
 ```
 
-Для GPU-метрик нужен установленный драйвер NVIDIA (`nvidia-smi` должен работать).
+For GPU metrics, NVIDIA driver must be installed (`nvidia-smi` should work).
 
-## Файлы
+## Files
 
-- `hwpulse.py` - основной скрипт.
-- `install.sh` - установка `hwpulse` (копирование в `/opt/hwpulse` + launcher в `/usr/local/bin`).
-- `uninstall.sh` - удаление `hwpulse` из `/usr/local/bin` и скрипта из `/opt/hwpulse`.
+- `hwpulse.py` - main script.
+- `install.sh` - installs `hwpulse` (copies to `/opt/hwpulse` + launcher in `/usr/local/bin`).
+- `uninstall.sh` - removes launcher from `/usr/local/bin` and script from `/opt/hwpulse`.
 
-## Режимы работы
+## Run Modes
 
-1. UI с графиками (по умолчанию):
+1. UI with graphs (default):
 
 ```bash
 python3 hwpulse.py
 ```
 
-2. UI без графиков:
+2. UI without graphs:
 
 ```bash
 python3 hwpulse.py --nograph
 ```
 
-3. JSON-режим по stdin/stdout (для IPC):
+3. JSON over stdin/stdout (for IPC):
 
 ```bash
 python3 hwpulse.py --json-stdio
 ```
 
-- Процесс работает постоянно.
-- Команда запроса: `get` (строка `get\n` в stdin).
-- На каждый `get` возвращается один JSON в stdout.
+- Process runs continuously.
+- Request command: `get` (line `get\n` to stdin).
+- Each `get` returns one JSON object to stdout.
 
-4. Одноразовый JSON-снимок:
+4. One-shot JSON snapshot:
 
 ```bash
 python3 hwpulse.py --json-once
 ```
 
-- Скрипт один раз собирает метрики, печатает JSON и завершает работу.
+- Script collects metrics once, prints JSON, and exits.
 
-Справка:
+Help:
 
 ```bash
 python3 hwpulse.py --help
 ```
 
-## Формат JSON
+## JSON Format
 
-- Корневые поля:
-  - `timestamp` - Unix time в миллисекундах.
-  - `systemName` - имя системы (из `PRETTY_NAME`).
-  - `kernel` - версия ядра (из `uname -r`).
-  - `cpu` - объект CPU (всегда присутствует).
-  - `gpu` - объект GPU (присутствует только если GPU определился).
+- Root fields:
+  - `timestamp` - Unix time in milliseconds.
+  - `systemName` - system name (from `PRETTY_NAME`).
+  - `kernel` - kernel version (from `uname -r`).
+  - `cpu` - CPU object (always present).
+  - `gpu` - GPU object (present only if GPU is detected).
 
-- Внутри `cpu`/`gpu`:
+- Inside `cpu`/`gpu`:
   - `modelName`
-  - доступные метрики для соответствующего устройства.
+  - available metrics for that device.
 
-Принципы заполнения:
+Population rules:
 
-- Если метрика не поддерживается на системе, ключ этой метрики не добавляется в JSON.
-- Если метрика поддерживается, но в конкретный момент не считалась, значение будет `null`.
+- If a metric is not supported on the system, its key is omitted from JSON.
+- If a metric is supported but failed to read at a specific moment, its value is `null`.
 
-Пример:
+Example:
 
 ```json
 {
@@ -126,16 +126,16 @@ python3 hwpulse.py --help
 }
 ```
 
-## Глобальная команда `hwpulse`
+## Global `hwpulse` Command
 
-Чтобы получить команду `hwpulse` из любой директории:
+To enable `hwpulse` from any directory:
 
 ```bash
 chmod +x install.sh
 ./install.sh
 ```
 
-После этого доступны:
+After that, you can run:
 
 ```bash
 hwpulse
@@ -144,7 +144,7 @@ hwpulse --json-stdio
 hwpulse --json-once
 ```
 
-## Удаление
+## Uninstall
 
 ```bash
 chmod +x uninstall.sh
