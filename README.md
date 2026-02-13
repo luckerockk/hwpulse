@@ -2,6 +2,8 @@
 
 Real-time terminal system monitor (CPU/GPU/RAM)
 
+<img width="1193" height="714" alt="demo" src="https://github.com/user-attachments/assets/dec808c1-dfb8-43fc-9f74-ddbf81c719e1" />
+
 ## Features
 
 - Color thresholds for load, temperature, and power.
