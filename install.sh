@@ -2,18 +2,25 @@
 set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd -P)"
-SOURCE_SCRIPT="$SCRIPT_DIR/hwpulse.py"
 APP_DIR="/opt/hwpulse"
-INSTALLED_SCRIPT="$APP_DIR/hwpulse.py"
 TARGET="/usr/local/bin/hwpulse"
 
-if [[ ! -f "$SOURCE_SCRIPT" ]]; then
-  echo "Error: script not found: $SOURCE_SCRIPT" >&2
+shopt -s nullglob
+SOURCE_FILES=("$SCRIPT_DIR"/hwpulse*.py)
+shopt -u nullglob
+
+if [[ ${#SOURCE_FILES[@]} -eq 0 ]]; then
+  echo "Error: no hwpulse*.py files found in: $SCRIPT_DIR" >&2
   exit 1
 fi
 
 sudo install -d -m 755 "$APP_DIR"
-sudo install -m 755 "$SOURCE_SCRIPT" "$INSTALLED_SCRIPT"
+sudo find "$APP_DIR" -maxdepth 1 -type f -name 'hwpulse*.py' -delete
+
+for src in "${SOURCE_FILES[@]}"; do
+  dst="$APP_DIR/$(basename "$src")"
+  sudo install -m 644 "$src" "$dst"
+done
 
 sudo tee "$TARGET" > /dev/null <<'EOF'
 #!/usr/bin/env bash
@@ -29,7 +36,10 @@ fi
 EOF
 
 sudo chmod +x "$TARGET"
-echo "Installed: $TARGET"
-echo "Installed script: $INSTALLED_SCRIPT"
-echo "Run: hwpulse"
 
+echo "Installed: $TARGET"
+echo "Installed scripts:"
+for src in "${SOURCE_FILES[@]}"; do
+  echo "  $(basename "$src")"
+done
+echo "Run: hwpulse"

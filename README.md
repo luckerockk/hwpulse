@@ -17,29 +17,25 @@ Real-time terminal system monitor (CPU/GPU/RAM)
 - Python **3.9+** (3.10+ recommended)
 - `free` (from `procps` package)
 - For GPU metrics: `nvidia-smi`
-- For CPU temperature: `sensors` (from `lm-sensors` package)
+- For CPU temperature: sysfs sources `/sys/class/thermal` and `/sys/class/hwmon` (if missing, the metric is unavailable)
 - For CPU power: `/sys/class/powercap/intel-rapl:0/energy_uj` (if missing, the metric is unavailable)
+- For CPU frequency: `/proc/cpuinfo` should contain `cpu MHz`; on some ARM systems frequency metrics may be unavailable (then frequency fields/graphs are hidden)
 
 ## Install Dependencies (Ubuntu/Debian)
 
 ```bash
 sudo apt update
-sudo apt install -y python3 procps util-linux lm-sensors
-```
-
-Optional sensor initialization:
-
-```bash
-sudo sensors-detect --auto
+sudo apt install -y python3 procps util-linux
 ```
 
 For GPU metrics, NVIDIA driver must be installed (`nvidia-smi` should work).
 
 ## Files
 
-- `hwpulse.py` - main script.
-- `install.sh` - installs `hwpulse` (copies to `/opt/hwpulse` + launcher in `/usr/local/bin`).
-- `uninstall.sh` - removes launcher from `/usr/local/bin` and script from `/opt/hwpulse`.
+- `hwpulse.py` - entrypoint (CLI + selecting run mode).
+- `hwpulse_common.py`, `hwpulse_metrics.py`, `hwpulse_ui.py`, `hwpulse_terminal.py`, `hwpulse_json.py` - internal modules.
+- `install.sh` - installs `hwpulse` (copies all `hwpulse*.py` files to `/opt/hwpulse` + launcher in `/usr/local/bin`).
+- `uninstall.sh` - removes launcher from `/usr/local/bin` and all `hwpulse*.py`, `*.pyc`, and `__pycache__` in `/opt/hwpulse`.
 
 ## Run Modes
 
